@@ -1,0 +1,93 @@
+// Copyright (c) 2026. Tony Robalik.
+// SPDX-License-Identifier: Apache-2.0
+package com.autonomousapps.jvm.projects
+
+import com.autonomousapps.AbstractProject
+import com.autonomousapps.kit.GradleProject
+import com.autonomousapps.kit.Source
+import com.autonomousapps.model.Advice
+import com.autonomousapps.model.GradleVariantIdentification
+import com.autonomousapps.model.ProjectAdvice
+
+import static com.autonomousapps.AdviceHelper.*
+import static com.autonomousapps.kit.gradle.Dependency.implementation
+import static com.autonomousapps.kit.gradle.Dependency.project
+import static com.autonomousapps.kit.gradle.Dependency.testFixturesImplementation
+import static com.autonomousapps.kit.gradle.Dependency.testImplementation
+import static com.autonomousapps.kit.gradle.dependencies.Dependencies.kotlinStdLib
+
+final class ExtensionFunctionsProject extends AbstractProject {
+
+  final GradleProject gradleProject
+
+    ExtensionFunctionsProject() {
+    this.gradleProject = build()
+  }
+
+  private GradleProject build() {
+    return newGradleProjectBuilder(GradleProject.DslKind.KOTLIN)
+      .withSubproject('consumer') { c ->
+        c.sources = consumerSources
+        c.withBuildScript { bs ->
+          bs.plugins = kotlin + plugins.javaTestFixtures
+          bs.dependencies = [
+            project('implementation', ':producer'),
+          ]
+        }
+      }
+      .withSubproject('producer') { c ->
+        c.sources = producerSources
+        c.withBuildScript { bs ->
+          bs.plugins = kotlin
+        }
+      }
+      .write()
+  }
+
+  private consumerSources = [
+    Source.kotlin(
+      """\
+      package com.example.consumer
+      
+      import com.example.producer.produce
+      import kotlin.random.Random
+
+
+      class TestConsumer {
+        private fun usesProducer() {
+          val produced = Random.produce()
+        }
+      }
+      """
+    )
+      .withSourceSet("testImplementation")
+      .withPath('com.example.consumer', 'TestConsumer')
+      .build(),
+  ]
+
+  private producerSources = [
+    Source.kotlin(
+      """\
+      package com.example.producer
+      import kotlin.random.Random
+      
+      fun Random.produce() = Any()
+      """
+    )
+      .withPath('com.example.producer', 'Producer')
+      .build(),
+  ]
+
+  Set<ProjectAdvice> actualProjectAdvice() {
+    return actualProjectAdvice(gradleProject)
+  }
+
+  private final Set<Advice> consumerAdvice = [
+    Advice.ofChange(projectCoordinates(':producer'), 'implementation', 'testImplementation'),
+  ]
+
+  final Set<ProjectAdvice> expectedProjectAdvice = [
+    projectAdviceForDependencies(':consumer', consumerAdvice),
+    emptyProjectAdviceFor(':producer'),
+  ]
+}
