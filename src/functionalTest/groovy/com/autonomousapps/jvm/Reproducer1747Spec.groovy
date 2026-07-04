@@ -3,16 +3,16 @@
 package com.autonomousapps.jvm
 
 
-import com.autonomousapps.jvm.projects.ExtensionFunctionsProject
+import com.autonomousapps.jvm.projects.Reproducer1747Project
 
 import static com.autonomousapps.utils.Runner.build
 import static com.google.common.truth.Truth.assertThat
 
-final class ExtensionFunctionsSpec extends AbstractJvmSpec {
+final class Reproducer1747Spec extends AbstractJvmSpec {
 
-  def "implementation to testImplementation (#gradleVersion)"() {
+  def "reproducer for issue 1747 (#gradleVersion)"() {
     given:
-    def project = new ExtensionFunctionsProject()
+    def project = new Reproducer1747Project()
     gradleProject = project.gradleProject
 
     when:

@@ -6,21 +6,16 @@ import com.autonomousapps.AbstractProject
 import com.autonomousapps.kit.GradleProject
 import com.autonomousapps.kit.Source
 import com.autonomousapps.model.Advice
-import com.autonomousapps.model.GradleVariantIdentification
 import com.autonomousapps.model.ProjectAdvice
 
 import static com.autonomousapps.AdviceHelper.*
-import static com.autonomousapps.kit.gradle.Dependency.implementation
 import static com.autonomousapps.kit.gradle.Dependency.project
-import static com.autonomousapps.kit.gradle.Dependency.testFixturesImplementation
-import static com.autonomousapps.kit.gradle.Dependency.testImplementation
-import static com.autonomousapps.kit.gradle.dependencies.Dependencies.kotlinStdLib
 
-final class ExtensionFunctionsProject extends AbstractProject {
+final class Reproducer1747Project extends AbstractProject {
 
   final GradleProject gradleProject
 
-    ExtensionFunctionsProject() {
+  Reproducer1747Project() {
     this.gradleProject = build()
   }
 
