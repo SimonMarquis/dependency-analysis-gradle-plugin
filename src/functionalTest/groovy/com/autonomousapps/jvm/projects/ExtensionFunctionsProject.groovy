@@ -32,6 +32,7 @@ final class ExtensionFunctionsProject extends AbstractProject {
           bs.plugins = kotlin + plugins.javaTestFixtures
           bs.dependencies = [
             project('implementation', ':producer'),
+            project('testFixturesImplementation', ':producer'),
           ]
         }
       }
@@ -48,19 +49,12 @@ final class ExtensionFunctionsProject extends AbstractProject {
     Source.kotlin(
       """\
       package com.example.consumer
-      
-      import com.example.producer.produce
-      import kotlin.random.Random
+      import com.example.producer.Producer
 
-
-      class TestConsumer {
-        private fun usesProducer() {
-          val produced = Random.produce()
-        }
-      }
+      fun main() = println(Producer)
       """
     )
-      .withSourceSet("testImplementation")
+      .withSourceSet("test")
       .withPath('com.example.consumer', 'TestConsumer')
       .build(),
   ]
@@ -69,9 +63,8 @@ final class ExtensionFunctionsProject extends AbstractProject {
     Source.kotlin(
       """\
       package com.example.producer
-      import kotlin.random.Random
       
-      fun Random.produce() = Any()
+      object Producer
       """
     )
       .withPath('com.example.producer', 'Producer')
@@ -84,6 +77,7 @@ final class ExtensionFunctionsProject extends AbstractProject {
 
   private final Set<Advice> consumerAdvice = [
     Advice.ofChange(projectCoordinates(':producer'), 'implementation', 'testImplementation'),
+    Advice.ofRemove(projectCoordinates(':producer'), 'testFixturesImplementation'),
   ]
 
   final Set<ProjectAdvice> expectedProjectAdvice = [
