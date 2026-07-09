@@ -21,6 +21,18 @@ final class AndroidJvmOverloadsProject extends AbstractAndroidProject {
 
   private GradleProject build() {
     return newAndroidGradleProjectBuilder()
+      .withAndroidLibProject('alt') { s ->
+        s.manifest = libraryManifest('com.example.alt')
+        s.sources = altSources
+        s.withBuildScript { bs ->
+          bs.plugins(androidLib())
+          bs.android = defaultAndroidLibBlock(true, 'com.example.alt')
+          bs.kotlin = Kotlin.DEFAULT
+          bs.dependencies(
+            project('testImplementation', ':producer'),
+          )
+        }
+      }
       .withAndroidLibProject('consumer') { s ->
         s.manifest = libraryManifest('com.example.consumer')
         s.sources = consumerSources
@@ -41,6 +53,24 @@ final class AndroidJvmOverloadsProject extends AbstractAndroidProject {
       }
       .write()
   }
+
+  private altSources = [
+    Source.kotlin(
+      """\
+      package com.example.alt
+      import com.example.producer.nextNumericalString
+      import kotlin.random.Random
+
+      class TestAlt {
+        private val id = Random.nextNumericalString()
+        fun test(context: android.content.Context) = println()
+      }
+      """
+    )
+      .withSourceSet("test")
+      .withPath('com.example.alt', 'TestAlt')
+      .build(),
+  ]
 
   private consumerSources = [
     Source.kotlin(
